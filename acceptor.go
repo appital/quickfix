@@ -16,6 +16,7 @@ import (
 
 //Acceptor accepts connections from FIX clients and manages the associated sessions.
 type Acceptor struct {
+	sync.RWMutex
 	app                   Application
 	settings              *Settings
 	logFactory            LogFactory
@@ -85,6 +86,7 @@ func (a *Acceptor) Start() error {
 		}
 	}
 
+	a.RLock()
 	for sessionID := range a.sessions {
 		session := a.sessions[sessionID]
 		a.sessionGroup.Add(1)
@@ -93,6 +95,7 @@ func (a *Acceptor) Start() error {
 			a.sessionGroup.Done()
 		}()
 	}
+	a.RUnlock()
 	if a.dynamicSessions {
 		a.dynamicSessionChan = make(chan *session)
 		a.sessionGroup.Add(1)
@@ -117,14 +120,18 @@ func (a *Acceptor) Stop() {
 	if a.dynamicSessions {
 		close(a.dynamicSessionChan)
 	}
+	a.RLock()
 	for _, session := range a.sessions {
 		session.stop()
 	}
+	a.RUnlock()
 	a.sessionGroup.Wait()
 }
 
 //Get remote IP address for a given session.
 func (a *Acceptor) RemoteAddr(sessionID SessionID) (net.Addr, bool) {
+	a.RLock()
+	defer a.RUnlock()
 	addr, ok := a.sessionAddr[sessionID]
 	return addr, ok
 }
@@ -154,6 +161,9 @@ func NewAcceptor(app Application, storeFactory MessageStoreFactory, settings *Se
 	if a.globalLog, err = logFactory.Create(); err != nil {
 		return
 	}
+
+	a.Lock()
+	defer a.Unlock()
 
 	for sessionID, sessionSettings := range settings.SessionSettings() {
 		sessID := sessionID
@@ -288,7 +298,10 @@ func (a *Acceptor) handleConnection(netConn net.Conn) {
 		a.dynamicQualifierCount++
 		sessID.Qualifier = strconv.Itoa(a.dynamicQualifierCount)
 	}
+
+	a.RLock()
 	session, ok := a.sessions[sessID]
+	a.RUnlock()
 	if !ok {
 		if !a.dynamicSessions {
 			a.globalLog.OnEventf("Session %v not found for incoming message: %s", sessID, msgBytes)
@@ -304,7 +317,9 @@ func (a *Acceptor) handleConnection(netConn net.Conn) {
 		defer session.stop()
 	}
 
+	a.Lock()
 	a.sessionAddr[sessID] = netConn.RemoteAddr()
+	a.Unlock()
 	msgIn := make(chan fixIn)
 	msgOut := make(chan []byte)
 
@@ -324,6 +339,7 @@ func (a *Acceptor) handleConnection(netConn net.Conn) {
 func (a *Acceptor) dynamicSessionsLoop() {
 	var id int
 	var sessions = map[int]*session{}
+	var mu sync.RWMutex
 	var complete = make(chan int)
 	defer close(complete)
 LOOP:
@@ -338,7 +354,9 @@ LOOP:
 			}
 			id++
 			sessionID := id
+			mu.Lock()
 			sessions[sessionID] = session
+			mu.Unlock()
 			go func() {
 				session.run()
 				err := UnregisterSession(session.sessionID)
@@ -349,10 +367,16 @@ LOOP:
 				complete <- sessionID
 			}()
 		case id := <-complete:
+			mu.RLock()
 			session, ok := sessions[id]
+			mu.RUnlock()
 			if ok {
+				a.Lock()
 				delete(a.sessionAddr, session.sessionID)
+				a.Unlock()
+				mu.Lock()
 				delete(sessions, id)
+				mu.Unlock()
 			} else {
 				a.globalLog.OnEventf("Missing dynamic session %v!", id)
 			}
@@ -363,6 +387,8 @@ LOOP:
 		return
 	}
 
+	mu.Lock()
+	defer mu.Unlock()
 	for id := range complete {
 		delete(sessions, id)
 		if len(sessions) == 0 {
