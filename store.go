@@ -1,6 +1,7 @@
 package quickfix
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -71,6 +72,7 @@ func (store *memoryStore) CreationTime() time.Time {
 }
 
 func (store *memoryStore) Reset() error {
+	fmt.Println("RESET THE MEMORY STORE")
 	store.senderMsgSeqNum = 0
 	store.targetMsgSeqNum = 0
 	store.creationTime = time.Now()

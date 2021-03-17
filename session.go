@@ -415,6 +415,7 @@ func (s *session) handleLogon(msg *Message) error {
 
 	var resetSeqNumFlag FIXBoolean
 	if err := msg.Body.GetField(tagResetSeqNumFlag, &resetSeqNumFlag); err == nil {
+		fmt.Println("CHECKING IN MESSAGE FOR ResetSeqNumFlag", resetSeqNumFlag.Bool())
 		if resetSeqNumFlag {
 			if !s.sentReset {
 				s.log.OnEvent("Logon contains ResetSeqNumFlag=Y, resetting sequence numbers to 1")
@@ -423,12 +424,14 @@ func (s *session) handleLogon(msg *Message) error {
 		}
 	}
 
+	fmt.Println("SHOULD RESET ON LOGON", resetStore)
 	if resetStore {
 		if err := s.store.Reset(); err != nil {
 			return err
 		}
 	}
 
+	fmt.Println("CHECKING IF SEQ NUM TOO HIGH")
 	if err := s.verifyIgnoreSeqNumTooHigh(msg); err != nil {
 		return err
 	}
@@ -448,6 +451,8 @@ func (s *session) handleLogon(msg *Message) error {
 
 	s.peerTimer.Reset(time.Duration(float64(1.2) * float64(s.HeartBtInt)))
 	s.application.OnLogon(s.sessionID)
+
+	fmt.Println("CHECK TARGET TOO HIGH")
 
 	if err := s.checkTargetTooHigh(msg); err != nil {
 		return err
