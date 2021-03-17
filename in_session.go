@@ -2,6 +2,7 @@ package quickfix
 
 import (
 	"bytes"
+	"fmt"
 	"time"
 
 	"github.com/quickfixgo/quickfix/internal"
@@ -90,6 +91,8 @@ func (state inSession) handleLogout(session *session, msg *Message) (nextState s
 	if err := session.store.IncrNextTargetMsgSeqNum(); err != nil {
 		session.logError(err)
 	}
+
+	fmt.Println("RESET ON LOGOUT", session.ResetOnLogout)
 
 	if session.ResetOnLogout {
 		if err := session.dropAndReset(); err != nil {

@@ -250,6 +250,7 @@ func (s *session) sendInReplyTo(msg *Message, inReplyTo *Message) error {
 
 //dropAndReset will drop the send queue and reset the message store
 func (s *session) dropAndReset() error {
+	fmt.Println("DROPPING QUEUE AND RESET")
 	s.sendMutex.Lock()
 	defer s.sendMutex.Unlock()
 
