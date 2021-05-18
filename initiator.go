@@ -3,6 +3,7 @@ package quickfix
 import (
 	"bufio"
 	"crypto/tls"
+	"net"
 	"strings"
 	"sync"
 	"time"
@@ -147,13 +148,9 @@ func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, di
 		address := session.SocketConnectAddress[connectionAttempt%len(session.SocketConnectAddress)]
 		session.log.OnEventf("Connecting to: %v", address)
 
-		netConn, err := dialer.Dial("tcp", address)
-		if err != nil {
-			session.log.OnEventf("Failed to connect: %v", err)
-			goto reconnect
-		} else if tlsConfig != nil {
-			// Unless InsecureSkipVerify is true, server name config is required for TLS
-			// to verify the received certificate
+		var netConn net.Conn
+
+		if tlsConfig != nil {
 			if !tlsConfig.InsecureSkipVerify && len(tlsConfig.ServerName) == 0 {
 				serverName := address
 				if c := strings.LastIndex(serverName, ":"); c > 0 {
@@ -161,12 +158,21 @@ func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, di
 				}
 				tlsConfig.ServerName = serverName
 			}
-			tlsConn := tls.Client(netConn, tlsConfig)
-			if err = tlsConn.Handshake(); err != nil {
-				session.log.OnEventf("Failed handshake: %v", err)
+			tlsConn, err := tls.Dial("tcp", address, tlsConfig)
+			if err != nil {
+				session.log.OnEventf("Failed to connect via TLS: %v", err)
 				goto reconnect
 			}
+
 			netConn = tlsConn
+		} else {
+			nc, err := dialer.Dial("tcp", address)
+			if err != nil {
+				session.log.OnEventf("Failed to connect: %v", err)
+				goto reconnect
+			}
+
+			netConn = nc
 		}
 
 		msgIn = make(chan fixIn)
