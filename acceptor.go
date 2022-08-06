@@ -334,10 +334,10 @@ func (a *Acceptor) handleConnection(netConn net.Conn) {
 
 	go func() {
 		msgIn <- fixIn{msgBytes, parser.lastRead}
-		readLoop(parser, msgIn)
+		readLoop(parser, msgIn, session.sessionID.String())
 	}()
 
-	writeLoop(netConn, msgOut, a.globalLog)
+	writeLoop(netConn, msgOut, a.globalLog, 0, session.sessionID.String())
 }
 
 func (a *Acceptor) dynamicSessionsLoop() {

@@ -53,6 +53,7 @@ func (s *SessionFactorySuite) TestDefaults() {
 	s.Equal(120*time.Second, session.MaxLatency)
 	s.False(session.DisableMessagePersist)
 	s.False(session.HeartBtIntOverride)
+	s.Equal(0, session.MaxMessagesPerSecond)
 }
 
 func (s *SessionFactorySuite) TestResetOnLogon() {
@@ -349,6 +350,7 @@ func (s *SessionFactorySuite) TestNewSessionBuildInitiators() {
 	s.SessionSettings.Set(config.HeartBtInt, "34")
 	s.SessionSettings.Set(config.SocketConnectHost, "127.0.0.1")
 	s.SessionSettings.Set(config.SocketConnectPort, "5000")
+	s.SessionSettings.Set(config.MaxMessagesPerSecond, "200")
 
 	session, err := s.newSession(s.SessionID, s.MessageStoreFactory, s.SessionSettings, s.LogFactory, s.App)
 	s.Nil(err)
@@ -358,6 +360,7 @@ func (s *SessionFactorySuite) TestNewSessionBuildInitiators() {
 	s.Equal(10*time.Second, session.LogonTimeout)
 	s.Equal(2*time.Second, session.LogoutTimeout)
 	s.Equal("127.0.0.1:5000", session.SocketConnectAddress[0])
+	s.Equal(200, session.MaxMessagesPerSecond)
 }
 
 func (s *SessionFactorySuite) TestNewSessionBuildAcceptors() {
