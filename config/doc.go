@@ -230,6 +230,12 @@ Time between reconnection attempts in seconds. Only used for initiators.    Valu
 
 Defaults to 30
 
+MaxMessagesPerSecond
+
+Maximum number of messages to send per second. Required if the remote party enforces rate limiting for incoming messages. A value of 0 means no rate limiting is enforced. Only used for initiators at present. Value must be 0 or a positive integer.
+
+Defaults to 0.
+
 LogoutTimeout
 
 Session setting for logout timeout in seconds. Only used for initiators. Value must be positive integer.

@@ -389,6 +389,20 @@ func (f sessionFactory) buildInitiatorSettings(session *session, settings *Sessi
 		session.LogonTimeout = time.Duration(timeout) * time.Second
 	}
 
+	session.MaxMessagesPerSecond = 0
+	if settings.HasSetting(config.MaxMessagesPerSecond) {
+		maxMessages, err := settings.IntSetting(config.MaxMessagesPerSecond)
+		if err != nil {
+			return err
+		}
+
+		if maxMessages < 0 {
+			return errors.New("MaxMessagesPerSecond must be greater or equal to zero")
+		}
+
+		session.MaxMessagesPerSecond = maxMessages
+	}
+
 	return f.configureSocketConnectAddress(session, settings)
 }
 

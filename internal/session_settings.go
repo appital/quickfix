@@ -18,7 +18,7 @@ type SessionSettings struct {
 	MaxLatency                   time.Duration
 	DisableMessagePersist        bool
 
-	//required on logon for FIX.T.1 messages
+	//required on logon for FIXT.1.1 messages
 	DefaultApplVerID string
 
 	//specific to initiators
@@ -26,4 +26,5 @@ type SessionSettings struct {
 	LogoutTimeout        time.Duration
 	LogonTimeout         time.Duration
 	SocketConnectAddress []string
+	MaxMessagesPerSecond int
 }
