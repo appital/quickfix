@@ -8,18 +8,9 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.14
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.13.0
-	github.com/quickfixgo/enum v0.0.0-20210629025633-9afc8539baba
-	github.com/quickfixgo/field v0.0.0-20171007195410-74cea5ec78c7
-	github.com/quickfixgo/fix40 v0.0.0-20171007200002-cce875b2c2e7
-	github.com/quickfixgo/fix41 v0.0.0-20171007212429-b272ca343ed2
-	github.com/quickfixgo/fix42 v0.0.0-20171007212724-86a4567f1c77
-	github.com/quickfixgo/fix43 v0.0.0-20171007213001-a7ff4f2a2470
-	github.com/quickfixgo/fix44 v0.0.0-20171007213039-f090a1006218
-	github.com/quickfixgo/fixt11 v0.0.0-20171007213433-d9788ca97f5d
-	github.com/quickfixgo/tag v0.0.0-20171007194743-cbb465760521
 	github.com/shopspring/decimal v1.3.1
 	github.com/stretchr/testify v1.8.0
-	golang.org/x/net v0.0.0-20220708220712-1185a9018129
+	golang.org/x/net v0.4.0
 	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9
 )
 
@@ -35,7 +26,7 @@ require (
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/stretchr/objx v0.4.0 // indirect
-	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
+	golang.org/x/sys v0.3.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
