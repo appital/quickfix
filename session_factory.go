@@ -384,6 +384,11 @@ func (f sessionFactory) buildAcceptorSettings(session *session, settings *Sessio
 	if err := f.buildHeartBtIntSettings(session, settings, false); err != nil {
 		return err
 	}
+
+	if err := f.buildMaxMessagesPerSecondSettings(session, settings); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -391,6 +396,10 @@ func (f sessionFactory) buildInitiatorSettings(session *session, settings *Sessi
 	session.InitiateLogon = true
 
 	if err := f.buildHeartBtIntSettings(session, settings, true); err != nil {
+		return err
+	}
+
+	if err := f.buildMaxMessagesPerSecondSettings(session, settings); err != nil {
 		return err
 	}
 
@@ -502,5 +511,20 @@ func (f sessionFactory) buildHeartBtIntSettings(session *session, settings *Sess
 		}
 		session.HeartBtInt = time.Duration(heartBtInt) * time.Second
 	}
+	return
+}
+
+func (f sessionFactory) buildMaxMessagesPerSecondSettings(session *session, settings *SessionSettings) (err error) {
+	session.MaxMessagesPerSecond = 0
+	if settings.HasSetting(config.MaxMessagesPerSecond) {
+		if session.MaxMessagesPerSecond, err = settings.IntSetting(config.MaxMessagesPerSecond); err != nil {
+			return
+		}
+
+		if session.MaxMessagesPerSecond < 0 {
+			return errors.New("MaxMessagesPerSecond must be greater than or equal to zero")
+		}
+	}
+
 	return
 }
