@@ -359,7 +359,7 @@ func (a *Acceptor) handleConnection(netConn net.Conn) {
 		readLoop(parser, msgIn, a.globalLog)
 	}()
 
-	writeLoop(netConn, msgOut, a.globalLog)
+	writeLoop(netConn, msgOut, a.globalLog, session.MaxMessagesPerSecond)
 }
 
 func (a *Acceptor) dynamicSessionsLoop() {
