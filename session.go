@@ -50,7 +50,7 @@ type session struct {
 	stateTimer *internal.EventTimer
 	peerTimer  *internal.EventTimer
 	sentReset  bool
-	stopOnce   sync.Once
+	stopOnce   *sync.Once
 
 	targetDefaultApplVerID string
 
@@ -863,7 +863,7 @@ func (s *session) onAdmin(msg interface{}) {
 }
 
 func (s *session) run() {
-	s.stopOnce = sync.Once{}
+	s.stopOnce = new(sync.Once)
 	s.Start(s)
 	var stopChan = make(chan struct{})
 	s.stateTimer = internal.NewEventTimer(func() {
