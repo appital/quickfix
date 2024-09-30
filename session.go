@@ -22,6 +22,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/matryer/resync"
 	"github.com/quickfixgo/quickfix/datadictionary"
 	"github.com/quickfixgo/quickfix/internal"
 )
@@ -53,7 +54,7 @@ type session struct {
 	stateTimer *internal.EventTimer
 	peerTimer  *internal.EventTimer
 	sentReset  bool
-	stopOnce   *sync.Once
+	stopOnce   resync.Once
 
 	targetDefaultApplVerID string
 
