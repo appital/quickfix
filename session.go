@@ -53,7 +53,7 @@ type session struct {
 	stateTimer *internal.EventTimer
 	peerTimer  *internal.EventTimer
 	sentReset  bool
-	stopOnce   internal.Once
+	stopOnce   sync.Once
 
 	targetDefaultApplVerID string
 
